@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import Pagination from './components/Pagination'
+import Posts from './components/Posts'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App = () => {
+
+    const [ posts, setPosts] = useState([])
+    const [ loading, setLoading ] = useState(true)
+    const [ currentPage, setCurrentPage ] = useState(1)
+    const [ postsPerPage ] = useState(10)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const resp = await fetch('https://jsonplaceholder.typicode.com/posts')
+            const data = await resp.json()
+
+            setPosts(data)
+            setLoading(false)
+        }
+
+        fetchData()
+    }, [])
+
+    const indexOfLastPost = currentPage * postsPerPage
+    const indexOfFirstPost = indexOfLastPost - postsPerPage
+    const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost)
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber)
+
+    return (
+        <div className="container mt-4">
+            <h2>My posts</h2>
+
+            <Posts posts={ currentPosts } loading={ loading } />
+
+            <Pagination
+                totalPosts={ posts.length }
+                postsPerPage={ postsPerPage }
+                paginate={ paginate } />
+        </div>
+    )
 }
 
-export default App;
+export default App
